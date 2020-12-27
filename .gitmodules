@@ -1,0 +1,3 @@
+[submodule "ecust_im_idl"]
+	path = ecust_im_idl
+	url = https://github.com/lz1998/ecust_im_idl

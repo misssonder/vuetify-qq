@@ -1,24 +1,26 @@
 <template>
   <div id="layout">
     <v-app-bar dense height="74" class="elevation-0" app color="#fff">
-      <v-app-bar-nav-icon @click="isShowDrawer=!isShowDrawer"/>
+      <v-avatar color="primary lighten-2" @click="isShowDrawer=!isShowDrawer">
+        <span class="white--text headline">{{ userInfo.nickname.substr(0, 2).toUpperCase() }}</span>
+      </v-avatar>
       <v-spacer/>
       <v-btn icon>
-        <v-icon dark>search</v-icon>
+        <v-icon dark @click="$router.push('/login')">exit_to_app</v-icon>
       </v-btn>
     </v-app-bar>
     <v-navigation-drawer app temporary v-model="isShowDrawer">
       <v-list>
         <v-list-item>
-          <v-list-item-avatar>
-            <v-img src="https://cdn.vuetifyjs.com/images/john.png"></v-img>
-          </v-list-item-avatar>
+          <v-avatar color="primary lighten-2" @click="isShowDrawer=!isShowDrawer">
+            <span class="white--text headline">{{ userInfo.nickname.substr(0, 2).toUpperCase() }}</span>
+          </v-avatar>
         </v-list-item>
 
         <v-list-item link>
           <v-list-item-content>
-            <v-list-item-title class="title">John Leider</v-list-item-title>
-            <v-list-item-subtitle>john@vuetifyjs.com</v-list-item-subtitle>
+            <v-list-item-title class="title">{{ userInfo.nickname }}</v-list-item-title>
+            <v-list-item-subtitle>{{ userInfo.userId }}</v-list-item-subtitle>
           </v-list-item-content>
 
           <v-list-item-action>
@@ -27,25 +29,25 @@
         </v-list-item>
       </v-list>
       <v-divider></v-divider>
-      <v-list
-          nav
-          dense
-      >
-        <v-list-item-group v-model="item" color="primary">
-          <v-list-item
-              v-for="(item, i) in items"
-              :key="i"
-          >
-            <v-list-item-icon>
-              <v-icon v-text="item.icon"></v-icon>
-            </v-list-item-icon>
+      <!--      <v-list-->
+      <!--          nav-->
+      <!--          dense-->
+      <!--      >-->
+      <!--        <v-list-item-group v-model="item" color="primary">-->
+      <!--          <v-list-item-->
+      <!--              v-for="(item, i) in items"-->
+      <!--              :key="i"-->
+      <!--          >-->
+      <!--            <v-list-item-icon>-->
+      <!--              <v-icon v-text="item.icon"></v-icon>-->
+      <!--            </v-list-item-icon>-->
 
-            <v-list-item-content>
-              <v-list-item-title v-text="item.text"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
+      <!--            <v-list-item-content>-->
+      <!--              <v-list-item-title v-text="item.text"></v-list-item-title>-->
+      <!--            </v-list-item-content>-->
+      <!--          </v-list-item>-->
+      <!--        </v-list-item-group>-->
+      <!--      </v-list>-->
     </v-navigation-drawer>
     <v-main>
       <router-view/>
@@ -62,21 +64,30 @@
     </v-bottom-navigation>
   </div>
 </template>
-<script>
+<script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import jwt from "jsonwebtoken"
+import cookie from "js-cookie";
+import {dto} from "@/client/proto/proto";
+import IUserInfo = dto.IUserInfo;
+import wsUrl from "@/client/WebSocketClient";
+import Long from "long";
+import Packet = dto.Packet;
 
 @Component({
-  name: "Layout"
+  name: "friend"
 })
 export default class extends Vue {
-  isShowDrawer = true
+  webSocket: WebSocket = this.$store.state.webSocket
+  userInfo: IUserInfo = {
+    userId: Long.fromInt(0),
+    nickname: '',
+    password: '',
+  }
+  isShowDrawer = false
   bottomRouter = "recent"
   routerItems = [
-    {
-      value: 'message',
-      icon: 'chat_bubble_outline'
-    },
     {
       value: 'friend',
       icon: 'supervisor_account'
@@ -96,6 +107,23 @@ export default class extends Vue {
     {text: 'Uploads', icon: 'mdi-upload'},
     {text: 'Backups', icon: 'mdi-cloud-upload'},
   ]
+
+  async getUserInfo() {
+    let token = cookie.get("token")
+    if (token != null) {
+      let userInfo: any = jwt.verify(token, "aaa")
+      this.userInfo.nickname = userInfo.nickname
+      this.userInfo.userId = userInfo.userId
+      this.userInfo.password = userInfo.password
+    }
+  }
+
+
+
+  created() {
+    this.getUserInfo()
+
+  }
 }
 </script>
 

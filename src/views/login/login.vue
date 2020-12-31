@@ -68,6 +68,7 @@ import ILoginReq = dto.ILoginReq;
 import {service} from "@/client/RpcClient";
 import IRegisterReq = dto.IRegisterReq;
 import IUserInfo = dto.IUserInfo;
+import Long from "long";
 //@ts-ignore
 import cookie from "js-cookie"
 
@@ -79,7 +80,7 @@ export default class extends Vue {
   isShowMessage = false
   message = ''
   loginReq: ILoginReq = {
-    userId: '',
+    userId: Long.fromInt(0),
     password: ''
   }
   registerReq: IRegisterReq = {
@@ -87,7 +88,7 @@ export default class extends Vue {
     nickname: '',
   }
   userInfo: IUserInfo = {
-    userId: '',
+    userId: Long.fromInt(0),
     nickname: '',
     password: ''
   }
